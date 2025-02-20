@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +14,23 @@ import 'package:flutter/material.dart';
 class PrescriptionController  extends GetxController {
 
  final db =  FirebaseFirestore.instance;
- final storage = FirebaseStorage.instance;
+ // final storage = FirebaseStorage.instance;
 
 
  TextEditingController nameController = TextEditingController();
  TextEditingController mobileController = TextEditingController();
+ TextEditingController patientnameController = TextEditingController();
+ TextEditingController patientLastnameController = TextEditingController();
+ TextEditingController patientageController = TextEditingController();
+ TextEditingController medicineNameController = TextEditingController();
+ TextEditingController dosageNameController = TextEditingController();
+ TextEditingController hospitalNameController = TextEditingController();
+ TextEditingController doctorQualificationController = TextEditingController();
 
    RxList prescriptionList = RxList();
+
+   // RxList addMedicineList = RxList();
+ RxList<Map<String, dynamic>> addMedicineList = <Map<String, dynamic>>[].obs;
 
 
  @override
@@ -47,28 +57,62 @@ class PrescriptionController  extends GetxController {
   }
 
 
+ //
+ // Future<String?> uploadImage(File imageFile) async {
+ //   try {
+ //     // Create a reference to the Firebase Storage
+ //     String fileName = DateTime.now().millisecondsSinceEpoch.toString() + '.jpg'; // Unique file name
+ //     Reference storageRef = storage.ref().child('prescriptions/$fileName');
+ //
+ //     // Upload the file
+ //     await storageRef.putFile(imageFile);
+ //
+ //     // Get the download URL
+ //     String downloadUrl = await storageRef.getDownloadURL();
+ //     return downloadUrl; // Return the download URL
+ //   } catch (e) {
+ //     print("Error uploading image: $e");
+ //     return null; // Handle error appropriately
+ //   }
+ // }
+ //
 
- Future<String?> uploadImage(File imageFile) async {
-   try {
-     // Create a reference to the Firebase Storage
-     String fileName = DateTime.now().millisecondsSinceEpoch.toString() + '.jpg'; // Unique file name
-     Reference storageRef = storage.ref().child('prescriptions/$fileName');
 
-     // Upload the file
-     await storageRef.putFile(imageFile);
+ Future<void> addPrescription(String hospitalName,String doctorQualification,String doctorName, String patientName, String age,String patientLastName,  List<Map<String, dynamic>> medicines) async {
 
-     // Get the download URL
-     String downloadUrl = await storageRef.getDownloadURL();
-     return downloadUrl; // Return the download URL
-   } catch (e) {
-     print("Error uploading image: $e");
-     return null; // Handle error appropriately
-   }
+     // Add prescription data to Firestore
+     await db.collection('prescriptions').add({
+       'hospitalName': hospitalName,
+       'doctorName': doctorName,
+       'doctorQualification': doctorQualification,
+       'patientName': patientName,
+       'patientLastName': patientLastName,
+       'age': age,
+       'medicines': medicines,
+       'timestamp': FieldValue.serverTimestamp(),
+     });
+
+///after inserting the data in table have to free the array as well
+
+     addMedicineList.clear();
+
+     nameController.clear();
+     mobileController.clear();
+     patientnameController.clear();
+     patientageController.clear();
+     medicineNameController.clear();
+     dosageNameController.clear();
+     hospitalNameController.clear();
+     doctorQualificationController.clear();
+
+
  }
 
 
 
 
+
+/*
  Future<void> addPrescription(String doctorName, String patientName, String age, List<Map<String, String>> medicines, File imageFile) async {
    // Upload the image and get the download URL
    String? imageUrl = await uploadImage(imageFile);
@@ -87,6 +131,7 @@ class PrescriptionController  extends GetxController {
      print("Failed to upload image.");
    }
  }
+*/
 
  Future<List<Map<String, dynamic>>> fetchPrescriptions() async {
    QuerySnapshot snapshot = await db
